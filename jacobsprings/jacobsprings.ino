@@ -156,7 +156,7 @@ void compressorLogic(){
         if ( freezerCooling ){
             freezerCooling = false;
             for (int j = 0; j < 2; j++){
-                if ( temps[j] > (freezerUpperBoundF - ((freezerUpperBoundF - freezerLowerBoundF) * (3/4))) ) {
+                if ( temps[j] > (freezerUpperBoundF - ((freezerUpperBoundF - freezerLowerBoundF) * (3.0/4))) ) {
                     freezerCooling = true;    
                     break;
                 }
