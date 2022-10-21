@@ -153,25 +153,28 @@ void loop() {
 
 void compressorLogic(){
     if ( !compressorOverrideOn && !compressorOverrideOff) { // first checks if any overrides are active
-        for (int i = 0; i < 2; i++) { // loops through first three temps
-            if ( freezerCooling ) {
-                if ( temps[i] > (freezerUpperBoundF - ((freezerUpperBoundF - freezerLowerBoundF) * (3/4))) ) {
+        if ( freezerCooling ){
+            freezerCooling = false;
+            for (int j = 0; j < 2; j++){
+                if ( temps[j] > (freezerUpperBoundF - ((freezerUpperBoundF - freezerLowerBoundF) * (3/4))) ) {
+                    freezerCooling = true;    
                     break;
                 }
-            }
-            freezerCooling = false;
-            
-            if ( temps[i] >= freezerUpperBoundF ){
-                compressorState = true; // if the temp is greater than the upper bound compressor state is set to true
-                freezerCooling = true;
-                break; // breaks if any of the sensors are greater.
-            }
-            else {
-                compressorState = false;
-            }
-
-                
+            }            
         }
+        if ( !freezerCooling ){
+            for (int i = 0; i < 2; i++) { // loops through first two temps
+                if ( temps[i] >= freezerUpperBoundF ){
+                    compressorState = true; // if the temp is greater than the upper bound compressor state is set to true
+                    freezerCooling = true;
+                    break; // breaks if any of the sensors are greater.
+                }
+                else {
+                    compressorState = false;
+                }
+            }
+        }
+
     } 
     else if ( compressorOverrideOn ){
         compressorState = true; // if the overrideOn is set to true then activate the compressor
@@ -180,10 +183,10 @@ void compressorLogic(){
         compressorState = false; // same but opposite
     }
 }
-
+// ignore fan logic 
 void fanLogic(){
     if ( !fanOverrideOn && !fanOverrideOff) { // first checks if any overrides are active
-        for (int i = 0; i < 2; i++) { // loops through first three temps
+        for (int i = 2; i < 4; i++) { // loops temps 2-3
             if ( fridgeCooling ) {
                 if ( temps[i] > (fridgeUpperBoundF - ((fridgeUpperBoundF - fridgeLowerBoundF) * (3/4))) ) {
                     break;
@@ -353,4 +356,3 @@ int fridgeBoundLowerF(String command){
 //       WiFi.off();              // stop trying and swith off WiFi
 //     stopTimer.stop();
 // }
-
