@@ -188,7 +188,7 @@ void fanLogic(){
     if ( !fanOverrideOn && !fanOverrideOff) { // first checks if any overrides are active
         for (int i = 2; i < 4; i++) { // loops temps 2-3
             if ( fridgeCooling ) {
-                if ( temps[i] > (fridgeUpperBoundF - ((fridgeUpperBoundF - fridgeLowerBoundF) * (3/4))) ) {
+                if ( temps[i] > (fridgeUpperBoundF - ((fridgeUpperBoundF - fridgeLowerBoundF) * (3.0/4))) ) {
                     break;
                 }
             }
