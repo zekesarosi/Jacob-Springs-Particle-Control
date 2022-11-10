@@ -12,73 +12,6 @@ class Sensor:
 		self.temp_data = list()
 
 
-class ReadLine:
-    def __init__(self, s):
-        self.buf = bytearray()
-        self.s = s
-
-    def readline(self):
-        i = self.buf.find(b"\n")
-        if i >= 0:
-            r = self.buf[:i+1]
-            self.buf = self.buf[i+1:]
-            return r
-        while True:
-            i = max(1, min(2048, self.s.in_waiting))
-            data = self.s.read(i)
-            i = data.find(b"\n")
-            if i >= 0:
-                r = self.buf + data[:i+1]
-                self.buf[0:] = data[i+1:]
-                return r
-            else:
-                self.buf.extend(data)
-
-def readSerial(ser, rl, temp1, temp2, temp3, temp4, temp5):
-	newline = rl.readline()
-	split = newline.split(', ')
-	temp1.append(split[0])
-	temp2.append(split[1])
-	temp3.append(split[2])
-	temp4.append(split[3])
-	temp5.append(split[4])
-
-def main2():
-	ser = serial.Serial('/dev/ttyACM0', 9600)
-	rl = ReadLine(ser)
-	temp1 = list()
-	temp2 = list()
-	temp3 = list()
-	temp4 = list()
-	temp5 = list()
-	x = list()
-
-	x_len = 200
-	y_range = [0, 100]
-
-	fig = plt.figure()
-	ax = fig.add_subplot(1,1,1)
-
-	x = list(range(0, 200))
-	temp1 = [0] * x_len
-	temp2 = [0] * x_len
-	temp3 = [0] * x_len
-	temp4 = [0] * x_len
-	temp5 = [0] * x_len
-
-	ax.set_ylim(y_range)
-
-	line1, = ax.plot(x, temp1)
-	line2, = ax.plot(x, temp2)
-	line3, = ax.plot(x, temp3)
-	line4, = ax.plot(x, temp4)
-	line5, = ax.plot(x, temp5)
-
-
-
-	ani = animation.FuncAnimation(fig, animate, fargs=(rl, x, temp1, temp2, temp3, temp4, temp5), interval=1000)
-	plt.show()
-
 
 
 def animate(i, rl, x, temp1, temp2, temp3, temp4, temp5):
@@ -119,7 +52,7 @@ def follow(thefile):
         if not line:
             time.sleep(0.01) # Sleep briefly
             continue
-        yield line
+        return line
 
 def plot(sensor1, sensor2, sensor3, sensor4, sensor5):
 	time = [ele for ele in range(len(sensor1))]
@@ -165,10 +98,18 @@ def main():
 				sensor5.temp_data.append(column[1])
 	plot(sensor1.temp_data, sensor2.temp_data, sensor3.temp_data, sensor4.temp_data, sensor5.temp_data)
 
-def main1():
-	with open(tempdatafile, mode='r') as file:
-		for line in follow(file):
-			print(line)
+def yeildline(temp1, temp2, temp3, temp4, temp5):
+	file = open(tempdatafile, mode='r')
+	line = follow(file)
+
+	split = line.split(', ')
+	temp1.append(int(split[0]))
+	print(split[0])
+	temp2.append(int(split[1]))
+	temp3.append(int(split[2]))
+	temp4.append(int(split[3]))
+	temp5.appendo(int(split[4]))
+	return temp1, temp2, temp3, temp4, temp5
 
 if __name__ == "__main__":
 	main1()

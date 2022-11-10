@@ -3,6 +3,7 @@ import matplotlib.animation as animation
 import serial
 import time
 import datetime as dt
+from tempparser import yeildline
 
 
 class ReadLine:
@@ -28,20 +29,27 @@ class ReadLine:
                 self.buf.extend(data)
 
 
-def animate(i, rl, temp1, temp2, temp3, temp4, temp5):
+def readSerial(rl, temp1, temp2, temp3, temp4, temp5):
     newline = rl.readline()
     split = newline.split(', ')
-    temp1.append(split[0])
-    temp2.append(split[1])
-    temp3.append(split[2])
-    temp4.append(split[3])
-    temp5.append(split[4])
+    temp1.append(int(split[0]))
+    temp2.append(int(split[1]))
+    temp3.append(int(split[2]))
+    temp4.append(int(split[3]))
+    temp5.appendo(int(split[4]))
+    return temp1, temp2, temp3, temp4, temp5
+def animate(i, rl, temp1, temp2, temp3, temp4, temp5):
 
+    # temp1, temp2, temp3, temp4, temp5 = readSerial(rl, temp1, temp2, temp3, temp4, temp5)
+    temp1, temp2, temp3, temp4, temp5 = yeildline(temp1, temp2, temp3, temp4, temp5)
+    print('temps yeilded')
     temp1 = temp1[-x_len:]
     temp2 = temp2[-x_len:]
     temp3 = temp3[-x_len:]
     temp4 = temp4[-x_len:]
     temp5 = temp5[-x_len:]
+
+    print(temp1)
 
     line1.set_ydata(temp1)
     line2.set_ydata(temp2)
@@ -49,10 +57,11 @@ def animate(i, rl, temp1, temp2, temp3, temp4, temp5):
     line4.set_ydata(temp4)
     line5.set_ydata(temp5)
 
-    return ((line1, ), (line2, ), (line3, ), (line4, ), (line5, ))
+    return (line1, line2, line3, line4, line5)
 
-ser = serial.Serial('/dev/ttyACM0', 9600)
-rl = ReadLine(ser)
+# ser = serial.Serial('/dev/ttyACM0', 9600)
+# rl = ReadLine(ser)
+rl = 1
 temp1 = list()
 temp2 = list()
 temp3 = list()
@@ -65,6 +74,8 @@ y_range = [0, 100]
 
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
+
+
 
 x = list(range(0, 200))
 temp1 = [0] * x_len
