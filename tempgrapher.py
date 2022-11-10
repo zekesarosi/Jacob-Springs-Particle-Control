@@ -30,18 +30,18 @@ class ReadLine:
 
 
 def readSerial(rl, temp1, temp2, temp3, temp4, temp5):
-    newline = rl.readline()
+    newline = str(rl.readline(), 'utf-8')
     split = newline.split(', ')
-    temp1.append(int(split[0]))
-    temp2.append(int(split[1]))
-    temp3.append(int(split[2]))
-    temp4.append(int(split[3]))
-    temp5.appendo(int(split[4]))
+    temp1.append(float(split[0]))
+    temp2.append(float(split[1]))
+    temp3.append(float(split[2]))
+    temp4.append(float(split[3]))
+    temp5.append(float(split[4]))
     return temp1, temp2, temp3, temp4, temp5
 def animate(i, rl, temp1, temp2, temp3, temp4, temp5):
 
-    # temp1, temp2, temp3, temp4, temp5 = readSerial(rl, temp1, temp2, temp3, temp4, temp5)
-    temp1, temp2, temp3, temp4, temp5 = yeildline(temp1, temp2, temp3, temp4, temp5)
+    temp1, temp2, temp3, temp4, temp5 = readSerial(rl, temp1, temp2, temp3, temp4, temp5)
+    # temp1, temp2, temp3, temp4, temp5 = yeildline(temp1, temp2, temp3, temp4, temp5)
     print('temps yeilded')
     temp1 = temp1[-x_len:]
     temp2 = temp2[-x_len:]
@@ -59,9 +59,11 @@ def animate(i, rl, temp1, temp2, temp3, temp4, temp5):
 
     return (line1, line2, line3, line4, line5)
 
-# ser = serial.Serial('/dev/ttyACM0', 9600)
-# rl = ReadLine(ser)
-rl = 1
+
+
+ser = serial.Serial('/dev/ttyACM0', 9600)
+rl = ReadLine(ser)
+
 temp1 = list()
 temp2 = list()
 temp3 = list()

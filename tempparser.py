@@ -52,7 +52,7 @@ def follow(thefile):
         if not line:
             time.sleep(0.01) # Sleep briefly
             continue
-        return line
+        yield line
 
 def plot(sensor1, sensor2, sensor3, sensor4, sensor5):
 	time = [ele for ele in range(len(sensor1))]
@@ -104,7 +104,7 @@ def yeildline(temp1, temp2, temp3, temp4, temp5):
 
 	split = line.split(', ')
 	temp1.append(int(split[0]))
-	print(split[0])
+	# print(split[0])
 	temp2.append(int(split[1]))
 	temp3.append(int(split[2]))
 	temp4.append(int(split[3]))
@@ -112,4 +112,6 @@ def yeildline(temp1, temp2, temp3, temp4, temp5):
 	return temp1, temp2, temp3, temp4, temp5
 
 if __name__ == "__main__":
-	main1()
+	file = open(tempdatafile, mode='r')
+	for line in follow(file):
+		print(line)
