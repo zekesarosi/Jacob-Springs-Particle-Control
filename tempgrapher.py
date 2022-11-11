@@ -31,6 +31,7 @@ class ReadLine:
 
 def readSerial(rl, temp1, temp2, temp3, temp4, temp5):
     newline = str(rl.readline(), 'utf-8')
+
     split = newline.split(', ')
     temp1.append(float(split[0]))
     temp2.append(float(split[1]))
@@ -38,18 +39,16 @@ def readSerial(rl, temp1, temp2, temp3, temp4, temp5):
     temp4.append(float(split[3]))
     temp5.append(float(split[4]))
     return temp1, temp2, temp3, temp4, temp5
-def animate(i, rl, temp1, temp2, temp3, temp4, temp5):
 
+def animate(i, rl, temp1, temp2, temp3, temp4, temp5):
     temp1, temp2, temp3, temp4, temp5 = readSerial(rl, temp1, temp2, temp3, temp4, temp5)
     # temp1, temp2, temp3, temp4, temp5 = yeildline(temp1, temp2, temp3, temp4, temp5)
-    print('temps yeilded')
+    # print('temps yeilded')
     temp1 = temp1[-x_len:]
     temp2 = temp2[-x_len:]
     temp3 = temp3[-x_len:]
     temp4 = temp4[-x_len:]
     temp5 = temp5[-x_len:]
-
-    print(temp1)
 
     line1.set_ydata(temp1)
     line2.set_ydata(temp2)
@@ -57,11 +56,11 @@ def animate(i, rl, temp1, temp2, temp3, temp4, temp5):
     line4.set_ydata(temp4)
     line5.set_ydata(temp5)
 
-    return (line1, line2, line3, line4, line5)
+    return line1, line2, line3, line4, line5
 
 
 
-ser = serial.Serial('/dev/ttyACM0', 9600)
+ser = serial.Serial('COM9', 9600)
 rl = ReadLine(ser)
 
 temp1 = list()
@@ -72,7 +71,7 @@ temp5 = list()
 x = list()
 
 x_len = 200
-y_range = [0, 100]
+y_range = [50, 90]
 
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
@@ -99,5 +98,5 @@ plt.xlabel('Samples')
 plt.ylabel('Temperature (deg F)')
 
 
-ani = animation.FuncAnimation(fig, animate, fargs=(rl, temp1, temp2, temp3, temp4, temp5), interval=100, blit=True)
+ani = animation.FuncAnimation(fig, animate, fargs=(rl, temp1, temp2, temp3, temp4, temp5), blit=True ,interval=30)
 plt.show()
