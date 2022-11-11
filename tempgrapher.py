@@ -70,15 +70,15 @@ temp4 = list()
 temp5 = list()
 x = list()
 
-x_len = 200
-y_range = [50, 90]
+x_len = 125
+y_range = [60, 95]
 
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
 
 
 
-x = list(range(0, 200))
+x = list(range(0, x_len))
 temp1 = [0] * x_len
 temp2 = [0] * x_len
 temp3 = [0] * x_len
@@ -87,10 +87,10 @@ temp5 = [0] * x_len
 
 ax.set_ylim(y_range)
 
-line1, = ax.plot(x, temp1)
-line2, = ax.plot(x, temp2)
-line3, = ax.plot(x, temp3)
-line4, = ax.plot(x, temp4)
+line1, = ax.plot(x, temp1, label="Freezer Temp 1")
+line2, = ax.plot(x, temp2, label= "Freezer Temp 2")
+line3, = ax.plot(x, temp3, label="Fridge Temp 1")
+line4, = ax.plot(x, temp4, label= "Fridge Temp 2")
 line5, = ax.plot(x, temp5)
 
 plt.title('Temperature over Time')
@@ -98,5 +98,5 @@ plt.xlabel('Samples')
 plt.ylabel('Temperature (deg F)')
 
 
-ani = animation.FuncAnimation(fig, animate, fargs=(rl, temp1, temp2, temp3, temp4, temp5), blit=True ,interval=30)
+ani = animation.FuncAnimation(fig, animate, fargs=(rl, temp1, temp2, temp3, temp4, temp5), blit=True)
 plt.show()
