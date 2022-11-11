@@ -38,10 +38,16 @@ def readSerial(rl, temp1, temp2, temp3, temp4, temp5):
     temp3.append(float(split[2]))
     temp4.append(float(split[3]))
     temp5.append(float(split[4]))
-    return temp1, temp2, temp3, temp4, temp5
+    temps = [float(split[0]), float(split[1]), float(split[2]), float(split[3]), float(split[4])]
+    return temp1, temp2, temp3, temp4, temp5, temps
 
 def animate(i, rl, temp1, temp2, temp3, temp4, temp5):
-    temp1, temp2, temp3, temp4, temp5 = readSerial(rl, temp1, temp2, temp3, temp4, temp5)
+    temp1, temp2, temp3, temp4, temp5, temps = readSerial(rl, temp1, temp2, temp3, temp4, temp5)
+    # if i % 5 == 0:
+    #     temps = [temp for temp in temps if temp != -1000]
+    #     max_temp = max(temps)
+    #     min_temp = min(temps)
+    #     ax.set_ylim(min_temp - 10, max_temp + 10)
     # temp1, temp2, temp3, temp4, temp5 = yeildline(temp1, temp2, temp3, temp4, temp5)
     # print('temps yeilded')
     temp1 = temp1[-x_len:]
@@ -71,7 +77,7 @@ temp5 = list()
 x = list()
 
 x_len = 125
-y_range = [60, 95]
+y_range = [65, 90]
 
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
@@ -87,16 +93,16 @@ temp5 = [0] * x_len
 
 ax.set_ylim(y_range)
 
-line1, = ax.plot(x, temp1, label="Freezer Temp 1")
-line2, = ax.plot(x, temp2, label= "Freezer Temp 2")
-line3, = ax.plot(x, temp3, label="Fridge Temp 1")
-line4, = ax.plot(x, temp4, label= "Fridge Temp 2")
+line1, = ax.plot(x, temp1, label="Freezer Temp 1", color="red")
+line2, = ax.plot(x, temp2, label= "Freezer Temp 2", color="blue")
+line3, = ax.plot(x, temp3, label="Fridge Temp 1", color="orange")
+line4, = ax.plot(x, temp4, label= "Fridge Temp 2", color="green")
 line5, = ax.plot(x, temp5)
 
 plt.title('Temperature over Time')
 plt.xlabel('Samples')
 plt.ylabel('Temperature (deg F)')
-
+plt.legend()
 
 ani = animation.FuncAnimation(fig, animate, fargs=(rl, temp1, temp2, temp3, temp4, temp5), blit=True)
 plt.show()
