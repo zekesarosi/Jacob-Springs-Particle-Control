@@ -29,20 +29,21 @@ class ReadLine:
                 self.buf.extend(data)
 
 
-def readSerial(rl, temp1, temp2, temp3, temp4, temp5):
+def readSerial(rl, temp1, temp2, temp3, temp4, temp5, file):
     newline = str(rl.readline(), 'utf-8')
-
+    file.write(newline)
+    file.write('\n')
     split = newline.split(', ')
     temp1.append(float(split[0]))
     temp2.append(float(split[1]))
     temp3.append(float(split[2]))
     temp4.append(float(split[3]))
-    temp5.append(float(split[4]))
+    # temp5.append(float(split[4]))
     temps = [float(split[0]), float(split[1]), float(split[2]), float(split[3]), float(split[4])]
     return temp1, temp2, temp3, temp4, temp5, temps
 
-def animate(i, rl, temp1, temp2, temp3, temp4, temp5):
-    temp1, temp2, temp3, temp4, temp5, temps = readSerial(rl, temp1, temp2, temp3, temp4, temp5)
+def animate(i, rl, temp1, temp2, temp3, temp4, temp5, file):
+    temp1, temp2, temp3, temp4, temp5, temps = readSerial(rl, temp1, temp2, temp3, temp4, temp5, file)
     # if i % 5 == 0:
     #     temps = [temp for temp in temps if temp != -1000]
     #     max_temp = max(temps)
@@ -97,12 +98,15 @@ line1, = ax.plot(x, temp1, label="Freezer Temp 1", color="red")
 line2, = ax.plot(x, temp2, label= "Freezer Temp 2", color="blue")
 line3, = ax.plot(x, temp3, label="Fridge Temp 1", color="orange")
 line4, = ax.plot(x, temp4, label= "Fridge Temp 2", color="green")
-line5, = ax.plot(x, temp5)
+# line5, = ax.plot(x, temp5)
 
 plt.title('Temperature over Time')
 plt.xlabel('Samples')
 plt.ylabel('Temperature (deg F)')
 plt.legend()
 
-ani = animation.FuncAnimation(fig, animate, fargs=(rl, temp1, temp2, temp3, temp4, temp5), blit=True)
+datafile = open("datafile.txt", mode='w')
+
+
+ani = animation.FuncAnimation(fig, animate, fargs=(rl, temp1, temp2, temp3, temp4, temp5, datafile), blit=True)
 plt.show()
