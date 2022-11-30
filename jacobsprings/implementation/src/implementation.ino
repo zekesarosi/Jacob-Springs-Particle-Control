@@ -1,7 +1,14 @@
+/*
+* Project Implementation
+* Description: A script to control a walkin fridge freezer
+* Author: Ezekiel Sarosi
+* Date: November 30, 2022
+*/
+
+
+#include <OneWire.h>
 #include <spark-dallas-temperature.h>
 #include <string>
-#include <sstream>
-#include <OneWire.h>
 
 #define INVALID_SENSOR_INDEX 0xff
 #define INVALID_TEMP 0x7fff
@@ -92,7 +99,7 @@ void setup() {
     pinMode(COMPRESSOR_RELAY, OUTPUT); // inits pin as OUTPUT
     pinMode(FAN_RELAY, OUTPUT); // same
     
-    Serial.println("Starting...");
+    //Serial.println("Starting...");
     sensors.begin(); // starts the dallas temp sensing
     sensorNum =  sensors.getDeviceCount(); // asks how many sensors are detected 
     
@@ -132,10 +139,10 @@ void loop() {
     // Serial.println(sensorNum);
     
     
-    Serial.print(" Requesting temperatures..."); 
+    //Serial.print(" Requesting temperatures..."); 
     sensors.requestTemperatures(); // ask sensors for temps
-    Serial.println("Temperatures recieved"); 
-    Serial.println("Updating Temperatures");
+    //Serial.println("Temperatures recieved"); 
+    //Serial.println("Updating Temperatures");
     updateAll(); // update and cout all temperature values
 
 
@@ -215,7 +222,7 @@ void coolingLoop(){
         }
         
     }
-    Serial.println("Cooling Loop Broken");
+//    Serial.println("Cooling Loop Broken");
     
 
 }
@@ -229,7 +236,7 @@ void compressorLogic(){
                 if ( temps[j] != -1000 ){
                     if ( temps[j] > (freezerUpperBoundF - ((freezerUpperBoundF - freezerLowerBoundF) * (3.0/4))) ) {
                         freezerCooling = true;
-                        Serial.println("Cooling Loop will continue");
+                       // Serial.println("Cooling Loop will continue");
                         break;
                     }
                 }
@@ -238,7 +245,7 @@ void compressorLogic(){
         if ( !freezerCooling ){
             for (int i = 0; i < 2; i++) { // loops through first two temps
                if ( temps[i] >= freezerUpperBoundF ){
-                    Serial.println("Cooling loop activated");
+                    //Serial.println("Cooling loop activated");
                     compressorState = true; // if the temp is greater than the upper bound compressor state is set to true
                     freezerCooling = true;
                     break; // breaks if any of the sensors are greater.
@@ -263,7 +270,7 @@ void compressorLogic(){
 void fanLogic(){
     if ( !fanOverrideOn && !fanOverrideOff) { // first checks if any overrides are active
         if ( fridgeCooling ){
-            Serial.println("Fridge Cooling");
+            //Serial.println("Fridge Cooling");
             freezerCooling = false;
             for (int j = 2; j < 4; j++){
                 if ( temps[j] > (fridgeUpperBoundF - ((fridgeUpperBoundF - fridgeLowerBoundF) * (3.0/4))) ) {
@@ -317,19 +324,19 @@ void compressorControl(bool control) {
 
 
 void updateAll() {   //updates all 5 sensors
-    Serial.print("Sensor 1: ");
+    //Serial.print("Sensor 1: ");
     temps[0] = updateTemperature(sensor1);
   
-    Serial.print("Sensor 2: ");
+    //Serial.print("Sensor 2: ");
     temps[1] = updateTemperature(sensor2);
   
-    Serial.print("Sensor 3: ");
+    //Serial.print("Sensor 3: ");
     temps[2] = updateTemperature(sensor3);
     
-    Serial.print("Sensor 4: ");
+    //Serial.print("Sensor 4: ");
     temps[3] = updateTemperature(sensor4);
     
-    Serial.print("Sensor 5: ");
+    //Serial.print("Sensor 5: ");
     temps[4] = updateTemperature(sensor5);
 }
 
@@ -337,12 +344,12 @@ void updateAll() {   //updates all 5 sensors
 double updateTemperature(DeviceAddress deviceAddress) { // askes each sensor for temperature and converts value to (F)
     if ( sensors.isConnected(deviceAddress) ) {
         double tempF = sensors.getTempF(deviceAddress);
-        Serial.print(tempF);
-        Serial.println(" F");
+        Serial.println(tempF);
+        //Serial.println(" F");
         return tempF;
     }
     else {
-        Serial.println("NOT DETECTED");
+        //Serial.println("NOT DETECTED");
         return -1000;
     }
 }
@@ -374,7 +381,7 @@ int fanOverrideToOff(String command){
 }
 
 
-//////
+//////////////////////////////////////////////
 
 
 
