@@ -51,7 +51,8 @@ def animate(i, rl, temp1, temp2, temp3, temp4, temp5, file):
     # temp1, temp2, temp3, temp4, temp5 = yeildline(temp1, temp2, temp3, temp4, temp5)
     # print('temps yeilded')
 
-    temp1, temp2, temp3, temp4, temp5 = temp1[:200], temp2[:200], temp3[:200], temp4[:200], temp5[:200]
+    temp1, temp2, temp3, temp4, temp5 = temp1[-x_len::], temp2[-x_len:], temp3[-x_len:], temp4[-x_len:], temp5[-x_len:]
+
 
     line1.set_ydata(temp1)
     line2.set_ydata(temp2)
@@ -63,7 +64,7 @@ def animate(i, rl, temp1, temp2, temp3, temp4, temp5, file):
 
 
 
-ser = serial.Serial('/dev/ttyACM0', 9600)
+ser = serial.Serial('COM9', 9600)
 rl = ReadLine(ser)
 
 temp1 = list()
@@ -90,10 +91,10 @@ temp5 = [0] * x_len
 
 ax.set_ylim(y_range)
 
-line1, = ax.plot(x, temp1, label="Freezer Temp 1", color="red")
-line2, = ax.plot(x, temp2, label= "Freezer Temp 2", color="blue")
-line3, = ax.plot(x, temp3, label="Fridge Temp 1", color="orange")
-line4, = ax.plot(x, temp4, label= "Fridge Temp 2", color="green")
+line1, = ax.plot(x, temp1)
+line2, = ax.plot(x, temp2)
+line3, = ax.plot(x, temp3, label="Fridge Temp 2", color="green")
+line4, = ax.plot(x, temp4, label= "Fridge Temp 1", color="red")
 # line5, = ax.plot(x, temp5)
 
 plt.title('Temperature over Time')
