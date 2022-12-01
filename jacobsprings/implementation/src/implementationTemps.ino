@@ -27,8 +27,8 @@
 // switching original sensors 1 & 4 for better testing 
 uint8_t sensor4[8] = { 0x28, 0xBB, 0xE0, 0x49, 0xF6, 0x96, 0x3C, 0x60 }; //sensors unique address declarations
 uint8_t sensor2[8] = { 0x28, 0x29, 0x99, 0x49, 0xF6, 0x80, 0x3C, 0x67 };
-uint8_t sensor3[8] = { 0x28, 0x58, 0x39, 0x81, 0xE3, 0xD8, 0x3C, 0xA0 };
-uint8_t sensor1[8] = { 0x28, 0xDE, 0xCA, 0x81, 0xE3, 0x59, 0x3C, 0xFB };
+uint8_t sensor1[8] = { 0x28, 0x58, 0x39, 0x81, 0xE3, 0xD8, 0x3C, 0xA0 };
+uint8_t sensor3[8] = { 0x28, 0xDE, 0xCA, 0x81, 0xE3, 0x59, 0x3C, 0xFB };
 uint8_t sensor5[8] = { 0x28, 0xA3, 0x0F, 0x49, 0xF6, 0xF5, 0x3C, 0x20 };
 
 
@@ -111,9 +111,9 @@ void setup() {
     Particle.variable("Number of Sensors", sensorNum); // publishes global vars to particle api, vars are updated after each loop
     Particle.variable("Freezer Temp 1 (yellow)", temps[0]);
     Particle.variable("Freezer Temp 2 (blue)", temps[1]);
-    Particle.variable("Fridge Temp 1 (orange)", temps[2]);
+    Particle.variable("Fridge Temp 1 (red)", temps[2]);
     Particle.variable("Fridge Temp 2 (green)", temps[3]);
-    Particle.variable("Compressor Temp (red)", temps[4]);
+    //Particle.variable("Compressor Temp (red)", temps[4]);
     Particle.variable("Fan State", fanState);
     Particle.variable("Compressor State", compressorState);
     Particle.variable("Freezer Upper Bound(F)", freezerUpperBoundF);
@@ -146,15 +146,17 @@ void loop() {
     updateAll(); // update and cout all temperature values
 
 
+    /*
     while ( checkError() ) {
         coolingLoop();
     }
+    */
     //compressorlogic is commented out because we dont want to run the compressor during testing
     //compressorLogic(); // runs the compressor 
     fanLogic(); // and fan logic
 
 
-    compressorControl(compressorState); // passes the desired state to the control function
+    //compressorControl(compressorState); // passes the desired state to the control function
     fanControl(fanState);
 
     
@@ -323,32 +325,35 @@ void compressorControl(bool control) {
 
 
 void updateAll() {   //updates all 5 sensors
-    //Serial.print("Sensor 1: ");
+    //Serial.print("1, ");
     temps[0] = updateTemperature(sensor1);
   
-    //Serial.print("Sensor 2: ");
+    //Serial.print("2, ");
     temps[1] = updateTemperature(sensor2);
   
-    //Serial.print("Sensor 3: ");
+    //Serial.print("3, ");
     temps[2] = updateTemperature(sensor3);
     
-    //Serial.print("Sensor 4: ");
+    //Serial.print("4, ");
     temps[3] = updateTemperature(sensor4);
     
-    //Serial.print("Sensor 5: ");
+    //Serial.print("5, ");
     temps[4] = updateTemperature(sensor5);
+    Serial.println("");
 }
 
 
 double updateTemperature(DeviceAddress deviceAddress) { // askes each sensor for temperature and converts value to (F)
     if ( sensors.isConnected(deviceAddress) ) {
         double tempF = sensors.getTempF(deviceAddress);
-        Serial.println(tempF);
+        Serial.print(tempF);
+        Serial.print(", ");
         //Serial.println(" F");
         return tempF;
     }
     else {
-        //Serial.println("NOT DETECTED");
+        Serial.print("-1000");
+        Serial.print(", ");
         return -1000;
     }
 }

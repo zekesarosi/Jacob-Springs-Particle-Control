@@ -37,12 +37,12 @@ def readSerial(rl, temp1, temp2, temp3, temp4, temp5, file):
     temp2.append(float(split[1]))
     temp3.append(float(split[2]))
     temp4.append(float(split[3]))
-    # temp5.append(float(split[4]))
-    temps = [float(split[0]), float(split[1]), float(split[2]), float(split[3]), float(split[4])]
-    return temp1, temp2, temp3, temp4, temp5, temps
+    #temp5.append(float(split[4]))
+    #temps = [float(split[0]), float(split[1]), float(split[2]), float(split[3]), float(split[4])]
+    return temp1, temp2, temp3, temp4, temp5
 
 def animate(i, rl, temp1, temp2, temp3, temp4, temp5, file):
-    temp1, temp2, temp3, temp4, temp5, temps = readSerial(rl, temp1, temp2, temp3, temp4, temp5, file)
+    temp1, temp2, temp3, temp4, temp5 = readSerial(rl, temp1, temp2, temp3, temp4, temp5, file)
     # if i % 5 == 0:
     #     temps = [temp for temp in temps if temp != -1000]
     #     max_temp = max(temps)
@@ -50,23 +50,20 @@ def animate(i, rl, temp1, temp2, temp3, temp4, temp5, file):
     #     ax.set_ylim(min_temp - 10, max_temp + 10)
     # temp1, temp2, temp3, temp4, temp5 = yeildline(temp1, temp2, temp3, temp4, temp5)
     # print('temps yeilded')
-    temp1 = temp1[-x_len:]
-    temp2 = temp2[-x_len:]
-    temp3 = temp3[-x_len:]
-    temp4 = temp4[-x_len:]
-    temp5 = temp5[-x_len:]
+
+    temp1, temp2, temp3, temp4, temp5 = temp1[:200], temp2[:200], temp3[:200], temp4[:200], temp5[:200]
 
     line1.set_ydata(temp1)
     line2.set_ydata(temp2)
     line3.set_ydata(temp3)
     line4.set_ydata(temp4)
-    line5.set_ydata(temp5)
+    #line5.set_ydata(temp5)
 
-    return line1, line2, line3, line4, line5
+    return line1, line2, line3, line4
 
 
 
-ser = serial.Serial('COM9', 9600)
+ser = serial.Serial('/dev/ttyACM0', 9600)
 rl = ReadLine(ser)
 
 temp1 = list()
