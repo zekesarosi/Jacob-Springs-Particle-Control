@@ -15,8 +15,8 @@
 #define ADDRESS_LEN 8
 #define WIRE_BUS 2
 #define ADDR_LEN 8
-#define COMPRESSOR_RELAY 5
-#define FAN_RELAY 7
+#define COMPRESSOR_RELAY 7
+#define FAN_RELAY 5
 
 
 //?? NOTE: the large sections of commented code is the beginnings of a higher level wifi control
@@ -245,7 +245,7 @@ void compressorLogic(){
             }
         }
         if ( !freezerCooling ){
-            for (int i = 0; i < 2; i++) { // loops through first two temps
+            for (int i = 2; i < 4; i++) { // loops through first two temps
                if ( temps[i] >= freezerUpperBoundF ){
                     //Serial.println("Cooling loop activated");
                     compressorState = true; // if the temp is greater than the upper bound compressor state is set to true
@@ -272,27 +272,32 @@ void compressorLogic(){
 void fanLogic(){
     if ( !fanOverrideOn && !fanOverrideOff) { // first checks if any overrides are active
         if ( fridgeCooling ){
-            //Serial.println("Fridge Cooling");
-            freezerCooling = false;
+            fridgeCooling = false;
             for (int j = 2; j < 4; j++){
-                if ( temps[j] > (fridgeUpperBoundF - ((fridgeUpperBoundF - fridgeLowerBoundF) * (3.0/4))) ) {
-                    fridgeCooling = true;    
-                    break;
+                if ( temps[j] != -1000 ){
+                    if ( temps[j] > (fridgeUpperBoundF - ((fridgeUpperBoundF - fridgeLowerBoundF) * (3.0/4))) ) {
+                        fridgeCooling = true;
+                       // Serial.println("Cooling Loop will continue");
+                        break;
+                    }
                 }
-            }            
+            }
         }
         if ( !fridgeCooling ){
-            for (int i = 0; i < 2; i++) { // loops through last two temps
-                if ( temps[i] >= fridgeUpperBoundF ){
-                    fanState = true; // if the temp is greater than the upper bound fan state is set to true
+            for (int i = 2; i < 4; i++) { // loops through first two temps
+               if ( temps[i] >= fridgeUpperBoundF ){
+                    //Serial.println("Cooling loop activated");
+                    fanState = true; // if the temp is greater than the upper bound compressor state is set to true
                     fridgeCooling = true;
                     break; // breaks if any of the sensors are greater.
                 }
                 else {
                     fanState = false;
-                }
+                } 
+
             }
         }
+
     } 
     else if ( fanOverrideOn ){
         fanState = true; // if the overrideOn is set to true then activate the compressor
