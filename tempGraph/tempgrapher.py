@@ -105,5 +105,5 @@ plt.legend()
 datafile = open("datafile.txt", mode='w')
 
 
-ani = animation.FuncAnimation(fig, animate, fargs=(rl, temp1, temp2, temp3, temp4, temp5, datafile), blit=True)
+ani = animation.FuncAnimation(fig, animate, fargs=(rl, temp1, temp2, temp3, temp4, temp5, datafile), blit=True, interval=10)
 plt.show()
