@@ -8,7 +8,7 @@ The code is implemented using a Particle Argon device. The code takes in four te
 
 If you want to compile the code yourself you have to include `project.properties`. 
 `particle complie argon` will throw errors because it will try to complile both source files into one.
-To compile the implementationTemps.ino you would in the particle-cli `particle compile argon src/implementationTemps.ino particle.properties`  
+To compile the `src/implementationTemps.ino` you would in the particle-cli `particle compile argon src/implementationTemps.ino particle.properties`  
 
 When preforming cooling logic for both the compressor and the fan the code first checks for if there are overrides present. If there are overrides then the code will make sure the compressor and the fan are adhereing to those. If no overrides are present then the logic will activate the compressor and the 
 
