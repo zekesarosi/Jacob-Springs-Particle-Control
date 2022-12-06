@@ -130,16 +130,12 @@ void setup() {
     Particle.function("Override Fan to On", fanOverrideToOn);
     Particle.function("Override Fan to Off", fanOverrideToOff);
     Particle.function("Reset Control Overrides", resetOverrides);
-    
 }
 
 void loop() {
     sensorNum =  sensors.getDeviceCount(); // checks how many sensors are connected
     Serial.print("Device count: ");
     Serial.println(sensorNum);
-    
-    
-    Serial.print(" Requesting temperatures..."); 
     sensors.requestTemperatures(); // ask sensors for temps
     Serial.println("Temperatures recieved"); 
     Serial.println("Updating Temperatures");
