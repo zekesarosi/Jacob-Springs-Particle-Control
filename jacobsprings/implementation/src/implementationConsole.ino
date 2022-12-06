@@ -157,7 +157,7 @@ void loop() {
     delay(2000); // waits 2 seconds
 }
 
-int checkError(){
+bool checkError(){
     sensors.requestTemperatures(); // update sensors
     updateAll();
 
@@ -168,34 +168,18 @@ int checkError(){
     return value of -3 means no temp sensors deteted
     */
     
-    if (!compressorOverrideOn && !compressorOverrideOff){}
-    if ( !sensors.getDeviceCount() == 0 ){
-        
-        if (!compressorOverrideOn && !compressorOverrideOff)
-    
-    
-    
-    
-    
-    
-    
-    
-        return 3;
-    } else {
-        return -3;
-    }
-    if (!compressorOverrideOn && !compressorOverrideOff){
+    if (!compressorOverrideOn && !compressorOverrideOff || !fanOverrideOn && !fanOverrideOff){
         if ( sensors.getDeviceCount() == 0 ){
-            return 3;
+            return true;
         }
         else if ( temps[0] == -1000 && temps[1] == -1000 ){
-            return 1;
+            return true;
         }
         else if ( temps[2] == -1000 && temps[3] == -1000 ){
             return true; 
         }
         else {
-            return 0; 
+            return false; 
         }
     }
     else {
@@ -214,6 +198,8 @@ void coolingLoop(){
     while ( checkError() ){
         compressorControl(true);
         fanControl(true);
+        //whats essentially happening here is that we are checking every 5 seconds if there is an error with the temp sensors and if there is 
+        // then we are activating a cooling loop that will cycle cooling 5 minutes on 5 minutes off
         while ( checkError() || interval_to_five > 0 ){ //on loop
             delay(5000); // wont be perfectly five seconds because of logic times. 
             interval_to_five = interval_to_five - 5;

@@ -21,8 +21,6 @@
 
 //?? NOTE: the large sections of commented code is the beginnings of a higher level wifi control
 
-// SYSTEM_MODE(SEMI_AUTOMATIC);
-// SYSTEM_THREAD(ENABLED);
 
 // switching original sensors 1 & 4 for better testing 
 uint8_t sensor4[8] = { 0x28, 0xBB, 0xE0, 0x49, 0xF6, 0x96, 0x3C, 0x60 }; //sensors unique address declarations
@@ -85,13 +83,6 @@ OneWire oneWire(WIRE_BUS); // inits the WIRE_BUS pin as the serial bus
 DallasTemperature sensors(&oneWire); // passes the serial bus to dallas temperature lib
 
 
-// const uint32_t msRetryDelay = 5*60000; // retry every 5min
-// const uint32_t msRetryTime  =   30000; // stop trying after 30sec
-
-// bool   retryRunning = false;
-// Timer retryTimer(msRetryDelay, retryConnect);  // timer to retry connecting
-// Timer stopTimer(msRetryTime, stopConnect);
-
 
 
 void setup() {
@@ -102,11 +93,6 @@ void setup() {
     //Serial.println("Starting...");
     sensors.begin(); // starts the dallas temp sensing
     sensorNum =  sensors.getDeviceCount(); // asks how many sensors are detected 
-    
-    //   Particle.connect();
-    // if (!waitFor(Particle.connected, msRetryTime)) {
-    //     WiFi.off();                // no luck, no need for WiFi
-    // }
     
     Particle.variable("Number of Sensors", sensorNum); // publishes global vars to particle api, vars are updated after each loop
     Particle.variable("Freezer Temp 1 (yellow)", temps[0]);
