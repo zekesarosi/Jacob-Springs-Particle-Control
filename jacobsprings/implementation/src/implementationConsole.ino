@@ -142,11 +142,9 @@ void loop() {
     updateAll(); // update and cout all temperature values
 
 
-    /*
     while ( checkError() ) {
         coolingLoop();
     }
-    */
 
     compressorLogic(); // runs the compressor 
     fanLogic(); // and fan logic
@@ -154,37 +152,50 @@ void loop() {
 
     compressorControl(compressorState); // passes the desired state to the control function
     fanControl(fanState);
-
-    
-    
-    // if (!retryRunning && !Particle.connected()) { // if we have not already scheduled a retry and are not connected
-    //     Serial.println("schedule");
-    //     stopTimer.start();         // set timeout for auto-retry by system
-    //     retryRunning = true;
-    //     retryTimer.start();        // schedula a retry
-    // }
-    
-    
+  
     
     delay(2000); // waits 2 seconds
 }
 
-bool checkError(){
+int checkError(){
     sensors.requestTemperatures(); // update sensors
     updateAll();
+
+    /*
+    return value of 0 means no error in each room
+    return value of -1 means error in freezer
+    return value of -2 means error in fridge
+    return value of -3 means no temp sensors deteted
+    */
     
-    if (!compressorOverrideOn && !compressorOverrideOff && !fanOverrideOn && !fanOverrideOff){
+    if (!compressorOverrideOn && !compressorOverrideOff){}
+    if ( !sensors.getDeviceCount() == 0 ){
+        
+        if (!compressorOverrideOn && !compressorOverrideOff)
+    
+    
+    
+    
+    
+    
+    
+    
+        return 3;
+    } else {
+        return -3;
+    }
+    if (!compressorOverrideOn && !compressorOverrideOff){
         if ( sensors.getDeviceCount() == 0 ){
-            return true;
+            return 3;
         }
         else if ( temps[0] == -1000 && temps[1] == -1000 ){
-            return true;
+            return 1;
         }
         else if ( temps[2] == -1000 && temps[3] == -1000 ){
-            return true;
+            return true; 
         }
         else {
-            return false;
+            return 0; 
         }
     }
     else {
