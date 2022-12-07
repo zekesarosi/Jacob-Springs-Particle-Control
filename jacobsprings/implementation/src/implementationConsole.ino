@@ -8,7 +8,7 @@
 
 #include <OneWire.h>
 #include <spark-dallas-temperature.h>
-
+#include <string>
 #define INVALID_SENSOR_INDEX 0xff
 #define INVALID_TEMP 0x7fff
 #define ADDRESS_LEN 8
@@ -29,7 +29,7 @@ uint8_t sensor2[8] = { 0x28, 0x29, 0x99, 0x49, 0xF6, 0x80, 0x3C, 0x67 };
 uint8_t sensor3[8] = { 0x28, 0x58, 0x39, 0x81, 0xE3, 0xD8, 0x3C, 0xA0 };
 uint8_t sensor4[8] = { 0x28, 0xDE, 0xCA, 0x81, 0xE3, 0x59, 0x3C, 0xFB };
 uint8_t sensor5[8] = { 0x28, 0xA3, 0x0F, 0x49, 0xF6, 0xF5, 0x3C, 0x20 };
-uint8_t sensors[5][8] = {sensor1, sensor2, sensor3, sensor4, sensor5};
+
 
 int freezerSensors[2] = { 0, 1 };
 int fridgeSensors[2] = { 2, 3 };
@@ -153,7 +153,7 @@ void loop() {
     fanControl(fanState);
   
     
-    delay(2000); // waits 2 seconds
+    delay(100000); // waits 10 seconds
 }
 
 bool checkError(){
@@ -314,38 +314,26 @@ void compressorControl(bool control) {
     }
 }
 
-void updateAll(){
-    for (int i; i < 5; i++){
-        Serial.print("Sensor ");
-        Serial.print(i);
-        Serial.print(": ");
-        temps[i] = updateTemperature(sensors[i]);
-        //if (temps[i] == -1000){
-         //   Particle.publish("Sensor Offline", i, PRIVATE);
-        //}        
-    }
-}
 
-
-void updateAll_bak() {   //updates all 5 sensors
+void updateAll() {   //updates all 5 sensors
     Serial.print("Sensor 1: ");
-    temps[0] = updateTemperature(sensor1);
+    temps[0] = updateTemperature(sensor1,"1");
   
     Serial.print("Sensor 2: ");
-    temps[1] = updateTemperature(sensor2);
+    temps[1] = updateTemperature(sensor2, "2");
   
     Serial.print("Sensor 3: ");
-    temps[2] = updateTemperature(sensor3);
+    temps[2] = updateTemperature(sensor3, "3");
     
     Serial.print("Sensor 4: ");
-    temps[3] = updateTemperature(sensor4);
+    temps[3] = updateTemperature(sensor4, "4");
     
     //Serial.print("Sensor 5: ");
     //temps[4] = updateTemperature(sensor5);
 }
 
 
-double updateTemperature(DeviceAddress deviceAddress) { // askes each sensor for temperature and converts value to (F)
+double updateTemperature(DeviceAddress deviceAddress, String device_num) { // askes each sensor for temperature and converts value to (F)
     if ( sensors.isConnected(deviceAddress) ) {
         double tempF = sensors.getTempF(deviceAddress);
         Serial.print(tempF);
@@ -355,6 +343,7 @@ double updateTemperature(DeviceAddress deviceAddress) { // askes each sensor for
     else {
         //Serial.println("NOT DETECTED");
        Serial.println("-1000");
+       Particle.publish("Sensor Offline", device_num, PUBLIC);
        return -1000;
     }
 }
