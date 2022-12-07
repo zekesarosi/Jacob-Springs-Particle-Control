@@ -47,7 +47,7 @@ int compressorOverrideToOn(String); // funcion prototype for overriding compress
 int compressorOverrideToOff(String);
 
 int fanOverrideToOn(String);
-int fanOverrideToOn(String);
+int fanOverrideToOff(String);
 
 int resetOverrides(String);
 int resetCustomTemps(String);
@@ -297,7 +297,7 @@ void fanLogic(){
 
 void fanControl(bool control) {
     if ( control ){
-        digitalWrite(FAN_RELAY, HIGH); // sets pin 5 to HIGH (3.3V)
+        digitalWrite(FAN_RELAY, HIGH); // sets the fan pin to HIGH (3.3V)
     }
     else {
         digitalWrite(FAN_RELAY, LOW); // sets to LOW (0 V)
@@ -307,7 +307,7 @@ void fanControl(bool control) {
 
 void compressorControl(bool control) {
     if ( control ){
-        digitalWrite(COMPRESSOR_RELAY, HIGH);
+        digitalWrite(COMPRESSOR_RELAY, HIGH); //sets the voltage on the compressor pin to high
     }
     else {
         digitalWrite(COMPRESSOR_RELAY, LOW);
@@ -333,7 +333,7 @@ void updateAll() {   //updates all 5 sensors
 }
 
 
-double updateTemperature(DeviceAddress deviceAddress, String device_num) { // askes each sensor for temperature and converts value to (F)
+double updateTemperature(DeviceAddress deviceAddress, String device_num) { // asks each sensor for temperature and converts value to (F)
     if ( sensors.isConnected(deviceAddress) ) {
         double tempF = sensors.getTempF(deviceAddress);
         Serial.print(tempF);
