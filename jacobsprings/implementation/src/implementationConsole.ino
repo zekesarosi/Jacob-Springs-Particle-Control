@@ -8,7 +8,6 @@
 
 #include <OneWire.h>
 #include <spark-dallas-temperature.h>
-#include <string>
 
 #define INVALID_SENSOR_INDEX 0xff
 #define INVALID_TEMP 0x7fff
@@ -321,9 +320,9 @@ void updateAll(){
         Serial.print(i);
         Serial.print(": ");
         temps[i] = updateTemperature(sensors[i]);
-        if (temps[i] == -1000){
-            Particle.publish("Sensor Offline", i);
-        }        
+        //if (temps[i] == -1000){
+         //   Particle.publish("Sensor Offline", i, PRIVATE);
+        //}        
     }
 }
 
