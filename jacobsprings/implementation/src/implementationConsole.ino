@@ -35,10 +35,10 @@ uint8_t sensor5[8] = { 0x28, 0xA3, 0x0F, 0x49, 0xF6, 0xF5, 0x3C, 0x20 };
 int freezerSensors[2] = { 0, 1 };
 int fridgeSensors[2] = { 2, 3 };
 
-// funcion protoypes that can be called from particle API, have to return an Int and be passed a string
+// function protoypes that can be called from particle API, have to return an Int and be passed a string
 
 
-int freezerBoundUpperF(String); // funcion prototype for setting upper freezer temp
+int freezerBoundUpperF(String); // function prototype for setting upper freezer temp
 int freezerBoundLowerF(String); // the lower temp prototype 
 
 int fridgeBoundUpperF(String); //same for the fridge
@@ -160,13 +160,6 @@ void loop() {
 bool checkError(){
     sensors.requestTemperatures(); // update sensors
     updateAll();
-
-    /*
-    return value of 0 means no error in each room
-    return value of -1 means error in freezer
-    return value of -2 means error in fridge
-    return value of -3 means no temp sensors deteted
-    */
     
     if (!compressorOverrideOn && !compressorOverrideOff || !fanOverrideOn && !fanOverrideOff){
         if ( sensors.getDeviceCount() == 0 ){
@@ -225,30 +218,31 @@ void coolingLoop(){
 
 void compressorLogic(){
     if ( !compressorOverrideOn && !compressorOverrideOff) { // first checks if any overrides are active
-        if ( freezerCooling ){
-            freezerCooling = false;
-            for (int j = 0; j < 2; j++){
-                if ( temps[j] != -1000 ){
+        if ( freezerCooling ){ //checks if the freezer is already cooling, if true then continues
+            freezerCooling = false; //sets the cooling state to false
+            for (int j = 0; j < 2; j++){ //loops through temp indexs that are assigned to freezer
+                if ( temps[j] != -1000 ){ //checks if the temperatures are valid, -1000 if no temperature detected
                     if ( temps[j] > (freezerUpperBoundF - ((freezerUpperBoundF - freezerLowerBoundF) * (3.0/4))) ) {
-                        freezerCooling = true;
+                        freezerCooling = true; //sets the cooling state back to true because one of the sensor values doesn't satisfy temp spec
                         Serial.println("Compressor Cooling Loop will continue");
-                        break;
+                        break; //breaks beacuse only one temp value has to be out of spec
                     }
                 }
             }
         }
-        if ( !freezerCooling ){
+        if ( !freezerCooling ){ //wont preform natural logic if cooling state is activated
             for (int i = 0; i < 2; i++) { // loops through first two temps
-               if ( temps[i] >= freezerUpperBoundF ){
-                    Serial.println("Compressor Cooling loop activated");
-                    compressorState = true; // if the temp is greater than the upper bound compressor state is set to true
-                    freezerCooling = true;
-                    break; // breaks if any of the sensors are greater.
+               if (temps[i] != -1000){
+                    if ( temps[i] >= freezerUpperBoundF ){
+                        Serial.println("Compressor Cooling loop activated");
+                        compressorState = true; // if the temp is greater than the upper bound compressor state is set to true
+                        freezerCooling = true;
+                        break; // breaks if any of the sensors are greater.
+                    }
+                    else {
+                        compressorState = false;
+                    } 
                 }
-                else {
-                    compressorState = false;
-                } 
-
             }
         }
 
@@ -261,29 +255,32 @@ void compressorLogic(){
     }
 }
 
-// ignore fan logic 
 void fanLogic(){
     if ( !fanOverrideOn && !fanOverrideOff) { // first checks if any overrides are active
         if ( fridgeCooling ){
             Serial.println("Fridge Cooling");
             freezerCooling = false;
             for (int j = 2; j < 4; j++){
-                if ( temps[j] > (fridgeUpperBoundF - ((fridgeUpperBoundF - fridgeLowerBoundF) * (3.0/4))) ) {
-                    fridgeCooling = true;    
-                    Serial.println("Fan Cooling Loop will continue");
-                    break;
+                if (temps[j] != -1000){
+                    if ( temps[j] > (fridgeUpperBoundF - ((fridgeUpperBoundF - fridgeLowerBoundF) * (3.0/4))) ) {
+                        fridgeCooling = true;    
+                        Serial.println("Fan Cooling Loop will continue");
+                        break;
+                    }
                 }
             }            
         }
         if ( !fridgeCooling ){
-            for (int i = 0; i < 2; i++) { // loops through last two temps
-                if ( temps[i] >= fridgeUpperBoundF ){
-                    fanState = true; // if the temp is greater than the upper bound fan state is set to true
-                    fridgeCooling = true;
-                    break; // breaks if any of the sensors are greater.
-                }
-                else {
-                    fanState = false;
+            for (int i = 2; i < 4; i++) { // loops through last two temps
+                if (temps[i] != -1000){
+                    if ( temps[i] >= fridgeUpperBoundF ){
+                        fanState = true; // if the temp is greater than the upper bound fan state is set to true
+                        fridgeCooling = true;
+                        break; // breaks if any of the sensors are greater.
+                    }
+                    else {
+                        fanState = false;
+                    }
                 }
             }
         }

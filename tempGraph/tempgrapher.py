@@ -1,11 +1,10 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import serial
-import time
 import datetime as dt
 
 
-class ReadLine:
+class ReadLine: #this class provides the necessary methods to read directly from a serial bus on Windows/OSX/Linux
     def __init__(self, s):
         self.buf = bytearray()
         self.s = s
@@ -37,34 +36,22 @@ def readSerial(rl, temp1, temp2, temp3, temp4, temp5, file):
     temp2.append(float(split[1]))
     temp3.append(float(split[2]))
     temp4.append(float(split[3]))
-    #temp5.append(float(split[4]))
-    #temps = [float(split[0]), float(split[1]), float(split[2]), float(split[3]), float(split[4])]
     return temp1, temp2, temp3, temp4, temp5
 
 def animate(i, rl, temp1, temp2, temp3, temp4, temp5, file):
     temp1, temp2, temp3, temp4, temp5 = readSerial(rl, temp1, temp2, temp3, temp4, temp5, file)
-    # if i % 5 == 0:
-    #     temps = [temp for temp in temps if temp != -1000]
-    #     max_temp = max(temps)
-    #     min_temp = min(temps)
-    #     ax.set_ylim(min_temp - 10, max_temp + 10)
-    # temp1, temp2, temp3, temp4, temp5 = yeildline(temp1, temp2, temp3, temp4, temp5)
-    # print('temps yeilded')
-
     temp1, temp2, temp3, temp4, temp5 = temp1[-x_len::], temp2[-x_len:], temp3[-x_len:], temp4[-x_len:], temp5[-x_len:]
-
 
     line1.set_ydata(temp1)
     line2.set_ydata(temp2)
     line3.set_ydata(temp3)
     line4.set_ydata(temp4)
-    #line5.set_ydata(temp5)
 
     return line1, line2, line3, line4
 
 
 
-ser = serial.Serial('COM9', 9600)
+ser = serial.Serial('COM9', 9600) #replace COM9 with the port that the device is plugged into
 rl = ReadLine(ser)
 
 temp1 = list()
@@ -95,7 +82,6 @@ line1, = ax.plot(x, temp1)
 line2, = ax.plot(x, temp2)
 line3, = ax.plot(x, temp3, label="Fridge Temp 2", color="green")
 line4, = ax.plot(x, temp4, label= "Fridge Temp 1", color="red")
-# line5, = ax.plot(x, temp5)
 
 plt.title('Temperature over Time')
 plt.xlabel('Samples')
