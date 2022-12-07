@@ -30,7 +30,7 @@ uint8_t sensor2[8] = { 0x28, 0x29, 0x99, 0x49, 0xF6, 0x80, 0x3C, 0x67 };
 uint8_t sensor3[8] = { 0x28, 0x58, 0x39, 0x81, 0xE3, 0xD8, 0x3C, 0xA0 };
 uint8_t sensor4[8] = { 0x28, 0xDE, 0xCA, 0x81, 0xE3, 0x59, 0x3C, 0xFB };
 uint8_t sensor5[8] = { 0x28, 0xA3, 0x0F, 0x49, 0xF6, 0xF5, 0x3C, 0x20 };
-
+uint8_t sensors[5][8] = {sensor1, sensor2, sensor3, sensor4, sensor5};
 
 int freezerSensors[2] = { 0, 1 };
 int fridgeSensors[2] = { 2, 3 };
@@ -315,8 +315,20 @@ void compressorControl(bool control) {
     }
 }
 
+void updateAll(){
+    for (int i; i < 5; i++){
+        Serial.print("Sensor ");
+        Serial.print(i);
+        Serial.print(": ");
+        temps[i] = updateTemperature(sensors[i]);
+        if (temps[i] == -1000){
+            Particle.publish("Sensor Offline", i);
+        }        
+    }
+}
 
-void updateAll() {   //updates all 5 sensors
+
+void updateAll_bak() {   //updates all 5 sensors
     Serial.print("Sensor 1: ");
     temps[0] = updateTemperature(sensor1);
   
@@ -329,8 +341,8 @@ void updateAll() {   //updates all 5 sensors
     Serial.print("Sensor 4: ");
     temps[3] = updateTemperature(sensor4);
     
-    Serial.print("Sensor 5: ");
-    temps[4] = updateTemperature(sensor5);
+    //Serial.print("Sensor 5: ");
+    //temps[4] = updateTemperature(sensor5);
 }
 
 
