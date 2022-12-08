@@ -78,7 +78,7 @@ bool fridgeCooling = false;
 
 double temps[5] = {}; // declaration for temperature array. Idexes are mapped 0-4 to sensor1-sensor5
 int sensorNum; // declaration for amount of sensors detected
-
+bool offlineStats[4] = {false, false, false, false};
 
 OneWire oneWire(WIRE_BUS); // inits the WIRE_BUS pin as the serial bus
 DallasTemperature sensors(&oneWire); // passes the serial bus to dallas temperature lib
@@ -108,11 +108,11 @@ void setup() {
     // }
     
     Particle.variable("Number of Sensors", sensorNum); // publishes global vars to particle api, vars are updated after each loop
-    Particle.variable("Freezer Temp 1 (yellow)", temps[0]);
+    Particle.variable("Freezer Temp 1 (red)", temps[0]);
     Particle.variable("Freezer Temp 2 (blue)", temps[1]);
     Particle.variable("Fridge Temp 1 (orange)", temps[2]);
     Particle.variable("Fridge Temp 2 (green)", temps[3]);
-    Particle.variable("Compressor Temp (red)", temps[4]);
+    Particle.variable("Compressor Temp (yellow)", temps[4]);
     Particle.variable("Fan State", fanState);
     Particle.variable("Compressor State", compressorState);
     Particle.variable("Freezer Upper Bound(F)", freezerUpperBoundF);
@@ -140,11 +140,6 @@ void loop() {
     Serial.println("Updating Temperatures");
     updateAll(); // update and cout all temperature values
 
-
-    while ( checkError() ) {
-        coolingLoop();
-    }
-
     compressorLogic(); // runs the compressor 
     fanLogic(); // and fan logic
 
@@ -152,15 +147,15 @@ void loop() {
     compressorControl(compressorState); // passes the desired state to the control function
     fanControl(fanState);
   
-    
-    delay(100000); // waits 10 seconds
+    Serial.println("-------------------------------------------------------------------");
+    delay(10000); // waits 10 seconds
 }
 
 bool checkError(){
     sensors.requestTemperatures(); // update sensors
     updateAll();
     
-    if (!compressorOverrideOn && !compressorOverrideOff || !fanOverrideOn && !fanOverrideOff){
+    if ((!compressorOverrideOn && !compressorOverrideOff) || (!fanOverrideOn && !fanOverrideOff)){
         if ( sensors.getDeviceCount() == 0 ){
             return true;
         }
@@ -220,6 +215,7 @@ void compressorLogic(){
         if ( freezerCooling ){ //checks if the freezer is already cooling, if true then continues
             freezerCooling = false; //sets the cooling state to false
             for (int j = 0; j < 2; j++){ //loops through temp indexs that are assigned to freezer
+                Serial.println("Compressor Cooling");
                 if ( temps[j] != -1000 ){ //checks if the temperatures are valid, -1000 if no temperature detected
                     if ( temps[j] > (freezerUpperBoundF - ((freezerUpperBoundF - freezerLowerBoundF) * (3.0/4))) ) {
                         freezerCooling = true; //sets the cooling state back to true because one of the sensor values doesn't satisfy temp spec
@@ -258,7 +254,7 @@ void fanLogic(){
     if ( !fanOverrideOn && !fanOverrideOff) { // first checks if any overrides are active
         if ( fridgeCooling ){
             Serial.println("Fridge Cooling");
-            freezerCooling = false;
+            fridgeCooling = false;
             for (int j = 2; j < 4; j++){
                 if (temps[j] != -1000){
                     if ( temps[j] > (fridgeUpperBoundF - ((fridgeUpperBoundF - fridgeLowerBoundF) * (3.0/4))) ) {
@@ -273,6 +269,7 @@ void fanLogic(){
             for (int i = 2; i < 4; i++) { // loops through last two temps
                 if (temps[i] != -1000){
                     if ( temps[i] >= fridgeUpperBoundF ){
+                        Serial.println("Fan Cooling Loop ");
                         fanState = true; // if the temp is greater than the upper bound fan state is set to true
                         fridgeCooling = true;
                         break; // breaks if any of the sensors are greater.
@@ -317,37 +314,45 @@ void compressorControl(bool control) {
 
 void updateAll() {   //updates all 5 sensors
     Serial.print("Sensor 1: ");
-    temps[0] = updateTemperature(sensor1,"1");
+    temps[0] = updateTemperature(sensor1, 1, "1");
   
     Serial.print("Sensor 2: ");
-    temps[1] = updateTemperature(sensor2, "2");
+    temps[1] = updateTemperature(sensor2, 2, "2");
   
     Serial.print("Sensor 3: ");
-    temps[2] = updateTemperature(sensor3, "3");
+    temps[2] = updateTemperature(sensor3, 3, "3");
     
     Serial.print("Sensor 4: ");
-    temps[3] = updateTemperature(sensor4, "4");
+    temps[3] = updateTemperature(sensor4, 4, "4");
     
     //Serial.print("Sensor 5: ");
     //temps[4] = updateTemperature(sensor5);
 }
 
 
-double updateTemperature(DeviceAddress deviceAddress, String device_num) { // askes each sensor for temperature and converts value to (F)
+double updateTemperature(DeviceAddress deviceAddress, int device_num, String deviceStr) { // askes each sensor for temperature and converts value to (F)
     if ( sensors.isConnected(deviceAddress) ) {
         double tempF = sensors.getTempF(deviceAddress);
         Serial.print(tempF);
         Serial.println(" F");
+        if ( offlineStats[device_num-1] == true ){
+            Serial.println("Sensor Online");
+            Particle.publish("Sensor Online", deviceStr, PUBLIC);
+            offlineStats[device_num-1] = false;
+        }        
         return tempF;
     }
     else {
         //Serial.println("NOT DETECTED");
        Serial.println("-1000");
-       Particle.publish("Sensor Offline", device_num, PUBLIC);
+       if (offlineStats[device_num-1] == false){ 
+           Particle.publish("Sensor Offline", deviceStr, PUBLIC);
+           Serial.println("Sensor Offline");
+           offlineStats[device_num-1] = true;
+       }
        return -1000;
     }
 }
-
 
 
 int compressorOverrideToOn(String command){ // override funcions for compressorOn / Off and the fan 
