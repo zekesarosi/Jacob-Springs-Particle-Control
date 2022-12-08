@@ -43,6 +43,11 @@ int freezerBoundLowerF(String); // the lower temp prototype
 int fridgeBoundUpperF(String); //same for the fridge
 int fridgeBoundLowerF(String);
 
+int freezerWarningF(String); //function prototype for warning notificaiton variable
+int fridgeWarningF(String); //function prototype for warning (fridge)
+
+int setNormOffset(String); //function prototype for setting the offset from warning temp to normal temp
+
 int compressorOverrideToOn(String); // funcion prototype for overriding compressor state
 int compressorOverrideToOff(String);
 
@@ -59,6 +64,11 @@ int freezerUpperBoundF = 0; // default values for fridge / freezer bounds
 int freezerLowerBoundF = -8;
 int fridgeUpperBoundF = 38;
 int fridgeLowerBoundF = 33;
+
+int normOffset = 6; //defines the offset from warning temp that a room's temperature must reach before its considered to not be "wayy to high", user will be sent notification 
+
+int freezerTempWarningF = 10;
+int fridgeTempWarningF = 48;
 
 // FLAGS /////////////
 
@@ -79,6 +89,9 @@ bool fridgeCooling = false;
 double temps[5] = {}; // declaration for temperature array. Idexes are mapped 0-4 to sensor1-sensor5
 int sensorNum; // declaration for amount of sensors detected
 bool offlineStats[4] = {false, false, false, false};
+
+bool tempStatsFridge = false; //to control notifications, false means temp within spec
+bool tempStatsFreezer = false;
 
 OneWire oneWire(WIRE_BUS); // inits the WIRE_BUS pin as the serial bus
 DallasTemperature sensors(&oneWire); // passes the serial bus to dallas temperature lib
@@ -119,6 +132,8 @@ void setup() {
     Particle.variable("Freezer Lower Bound(F)", freezerLowerBoundF);
     Particle.variable("Fridge Upper Bound(F)", fridgeUpperBoundF);
     Particle.variable("Fridge Lower Bound(F)", fridgeLowerBoundF);
+    Particle.variable("Freezer Warning Temp (F)", freezerTempWarningF);
+    Particle.variable("Fridge Warning Temp (F)", fridgeTempWarningF);
     Particle.function("Set Freezer High(F)", freezerBoundUpperF); // same but with functions
     Particle.function("Set Freezer Low(F)", freezerBoundLowerF);
     Particle.function("Set Fridge High(F)", fridgeBoundUpperF);
@@ -128,6 +143,8 @@ void setup() {
     Particle.function("Override Compressor to Off", compressorOverrideToOff);
     Particle.function("Override Fan to On", fanOverrideToOn);
     Particle.function("Override Fan to Off", fanOverrideToOff);
+    Particle.function("Set Freezer Warning Temp", freezerWarningF);
+    Particle.function("Set Fridge Warning Temp", fridgeWarningF);
     Particle.function("Reset Control Overrides", resetOverrides);
 }
 
@@ -218,6 +235,13 @@ void compressorLogic(){
                 Serial.println("Compressor Cooling");
                 if ( temps[j] != -1000 ){ //checks if the temperatures are valid, -1000 if no temperature detected
                     if ( temps[j] > (freezerUpperBoundF - ((freezerUpperBoundF - freezerLowerBoundF) * (3.0/4))) ) {
+                        
+                        if ( temps[j] >= freezerTempWarningF && !tempStatsFreezer){
+                            Particle.publish("Temp High", "Freezer", PUBLIC);
+                            Serial.println("Freezer Temperature wayy to high");
+                            tempStatsFridge = true; 
+                        } 
+
                         freezerCooling = true; //sets the cooling state back to true because one of the sensor values doesn't satisfy temp spec
                         Serial.println("Compressor Cooling Loop will continue");
                         break; //breaks beacuse only one temp value has to be out of spec
@@ -229,6 +253,13 @@ void compressorLogic(){
             for (int i = 0; i < 2; i++) { // loops through first two temps
                if (temps[i] != -1000){
                     if ( temps[i] >= freezerUpperBoundF ){
+                        
+                        if (temps[i] <= freezerTempWarningF - normOffset && tempStatsFreezer){
+                            tempStatsFreezer= false;
+                            Serial.println("Freezer not wayy out of spec");
+                            Particle.publish("Temp Norm", "Freezer", PUBLIC);
+                        }
+
                         Serial.println("Compressor Cooling loop activated");
                         compressorState = true; // if the temp is greater than the upper bound compressor state is set to true
                         freezerCooling = true;
@@ -260,6 +291,13 @@ void fanLogic(){
                     if ( temps[j] > (fridgeUpperBoundF - ((fridgeUpperBoundF - fridgeLowerBoundF) * (3.0/4))) ) {
                         fridgeCooling = true;    
                         Serial.println("Fan Cooling Loop will continue");
+
+                        if ( temps[j] >= fridgeTempWarningF && !tempStatsFridge){
+                            Particle.publish("Temp High", "Fridge", PUBLIC);
+                            Serial.println("Fridge Temperature wayy to high");
+                            tempStatsFridge = true; 
+                        } 
+                        
                         break;
                     }
                 }
@@ -269,6 +307,11 @@ void fanLogic(){
             for (int i = 2; i < 4; i++) { // loops through last two temps
                 if (temps[i] != -1000){
                     if ( temps[i] >= fridgeUpperBoundF ){
+                        if (temps[i] <= fridgeTempWarningF - normOffset && tempStatsFridge){
+                            tempStatsFridge = false;
+                            Serial.println("Fridge not wayy out of spec");
+                            Particle.publish("Temp Norm", "Fridge", PUBLIC);
+                        }
                         Serial.println("Fan Cooling Loop ");
                         fanState = true; // if the temp is greater than the upper bound fan state is set to true
                         fridgeCooling = true;
@@ -330,7 +373,7 @@ void updateAll() {   //updates all 5 sensors
 }
 
 
-double updateTemperature(DeviceAddress deviceAddress, String device_num) { // asks each sensor for temperature and converts value to (F)
+double updateTemperature(DeviceAddress deviceAddress, int device_num, String deviceStr) { // asks each sensor for temperature and converts value to (F)
     if ( sensors.isConnected(deviceAddress) ) {
         double tempF = sensors.getTempF(deviceAddress);
         Serial.print(tempF);
@@ -409,6 +452,15 @@ int freezerBoundLowerF(String command){
     freezerLowerBoundF = command.toFloat(); //mostly the same as above 
     return freezerLowerBoundF;
 }
+int freezerWarningF(String command){
+    freezerTempWarningF = command.toFloat();
+    return freezerTempWarningF;
+}
+
+int setNormOffset(String command){
+    normOffset = command.toFloat();
+    return normOffset;
+}
 
 int fridgeBoundUpperF(String command){
     fridgeUpperBoundF = command.toFloat();
@@ -417,6 +469,10 @@ int fridgeBoundUpperF(String command){
 int fridgeBoundLowerF(String command){
     fridgeLowerBoundF = command.toFloat();
     return fridgeLowerBoundF;
+}
+int fridgeWarningF(String command){
+    fridgeTempWarningF = command.toFloat();
+    return fridgeTempWarningF;
 }
 
 
