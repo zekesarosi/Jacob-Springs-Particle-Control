@@ -15,3 +15,7 @@ When preforming cooling logic for both the compressor and the fan the code first
 If you are trying to replicate the project, or have any questions about the code and or the implemenation don't hesitate to reach out. 
 
 sko buffs
+
+
+
+to be added: functionality for temperature out of spec IFTTT api integration
