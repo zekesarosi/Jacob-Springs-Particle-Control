@@ -3,3 +3,4 @@ tempGraph/datafile.txt
 .vscode/c_cpp_properties.json
 jacobsprings/implementation/bin/*
 .idea/*
+*.bin
