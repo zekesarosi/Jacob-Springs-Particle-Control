@@ -252,14 +252,14 @@ void compressorLogic(){
         if ( !freezerCooling ){ //wont preform natural logic if cooling state is activated
             for (int i = 0; i < 2; i++) { // loops through first two temps
                if (temps[i] != -1000){
-                    if ( temps[i] >= freezerUpperBoundF ){
                         
-                        if (temps[i] <= freezerTempWarningF - normOffset && tempStatsFreezer){
-                            tempStatsFreezer= false;
-                            Serial.println("Freezer not wayy out of spec");
-                            Particle.publish("Temp Norm", "Freezer", PUBLIC);
-                        }
+                    if (temps[i] <= freezerTempWarningF - normOffset && tempStatsFreezer){
+                        tempStatsFreezer= false;
+                        Serial.println("Freezer not wayy out of spec");
+                        Particle.publish("Temp Norm", "Freezer", PUBLIC);
+                    }
 
+                    if ( temps[i] >= freezerUpperBoundF ){
                         Serial.println("Compressor Cooling loop activated");
                         compressorState = true; // if the temp is greater than the upper bound compressor state is set to true
                         freezerCooling = true;
@@ -306,12 +306,12 @@ void fanLogic(){
         if ( !fridgeCooling ){
             for (int i = 2; i < 4; i++) { // loops through last two temps
                 if (temps[i] != -1000){
+                    if (temps[i] <= fridgeTempWarningF - normOffset && tempStatsFridge){
+                        tempStatsFridge = false;
+                        Serial.println("Fridge not wayy out of spec");
+                        Particle.publish("Temp Norm", "Fridge", PUBLIC);
+                    }
                     if ( temps[i] >= fridgeUpperBoundF ){
-                        if (temps[i] <= fridgeTempWarningF - normOffset && tempStatsFridge){
-                            tempStatsFridge = false;
-                            Serial.println("Fridge not wayy out of spec");
-                            Particle.publish("Temp Norm", "Fridge", PUBLIC);
-                        }
                         Serial.println("Fan Cooling Loop ");
                         fanState = true; // if the temp is greater than the upper bound fan state is set to true
                         fridgeCooling = true;
