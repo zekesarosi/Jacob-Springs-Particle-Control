@@ -239,7 +239,7 @@ void compressorLogic(){
                         if ( temps[j] >= freezerTempWarningF && !tempStatsFreezer){
                             Particle.publish("Temp High", "Freezer", PUBLIC);
                             Serial.println("Freezer Temperature wayy to high");
-                            tempStatsFridge = true; 
+                            tempStatsFreezer = true; 
                         } 
 
                         freezerCooling = true; //sets the cooling state back to true because one of the sensor values doesn't satisfy temp spec
@@ -371,7 +371,6 @@ void updateAll() {   //updates all 5 sensors
     //Serial.print("Sensor 5: ");
     //temps[4] = updateTemperature(sensor5);
 }
-
 
 double updateTemperature(DeviceAddress deviceAddress, int device_num, String deviceStr) { // asks each sensor for temperature and converts value to (F)
     if ( sensors.isConnected(deviceAddress) ) {
