@@ -19,7 +19,7 @@
 #define FAN_RELAY 7
 
 int sleepTime = 10000; // time to sleep between loops, 10000ms = 10s
-int logTime = 1; // time to log data to cloud mins
+int logTime = 45; // time to log data to cloud mins
 
 //?? NOTE: the large sections of commented code is the beginnings of a higher level wifi control
 
