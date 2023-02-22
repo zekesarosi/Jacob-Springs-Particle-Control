@@ -16,6 +16,12 @@ If you are trying to replicate the project, or have any questions about the code
 
 sko buffs
 
+recently added (22 Feb 2023) was functionality for push notifications via IFTTT. 
+also added was data logging to google sheets via api. GS code to be implemented on google side can be found in `jacobsprings/implementation/data-logging`
 
+Downloading the precompiled binary for Feb 22, 2023
+can be located in `jacobsprings/implementation/bin/`
 
-to be added: functionality for temperature out of spec IFTTT api integration
+sha256 checksum: ceff975b37e6d55b58869d897cec4d0fac2bf7c26d79447ada3a20d95cef9284
+
+verify the binary before flashing it to your device or compile from source for most security
