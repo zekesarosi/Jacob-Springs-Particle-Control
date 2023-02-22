@@ -2,13 +2,15 @@
 * Project Implementation
 * Description: A script to control a walkin fridge freezer, has debug info
 * Author: Ezekiel Sarosi
-* Date: November 30, 2022
+* Date: February 21, 2023
 */
 
-
+#include "Particle.h"
 #include <OneWire.h>
 #include <spark-dallas-temperature.h>
 #include <string>
+#include <ArduinoJson.h>
+
 #define INVALID_SENSOR_INDEX 0xff
 #define INVALID_TEMP 0x7fff
 #define ADDRESS_LEN 8
@@ -17,6 +19,8 @@
 #define COMPRESSOR_RELAY 5
 #define FAN_RELAY 7
 
+int sleepTime = 10000; // time to sleep between loops, 10000ms = 10s
+int logTime = 1; // time to log data to cloud mins
 
 //?? NOTE: the large sections of commented code is the beginnings of a higher level wifi control
 
@@ -36,7 +40,7 @@ int fridgeSensors[2] = { 2, 3 };
 
 // function protoypes that can be called from particle API, have to return an Int and be passed a string
 
-
+void logData(); // function prototype for logging data to cloud
 int freezerBoundUpperF(String); // function prototype for setting upper freezer temp
 int freezerBoundLowerF(String); // the lower temp prototype 
 
@@ -56,6 +60,8 @@ int fanOverrideToOff(String);
 
 int resetOverrides(String);
 int resetCustomTemps(String);
+
+int setLogTime(String); // function prototype for setting the time between data logs, whole minutes only!
 
 ////////////////////////////////////////////////////////////////
 
@@ -96,6 +102,7 @@ bool tempStatsFreezer = false;
 OneWire oneWire(WIRE_BUS); // inits the WIRE_BUS pin as the serial bus
 DallasTemperature sensors(&oneWire); // passes the serial bus to dallas temperature lib
 
+int timePassed = 0; //time thats passed ms
 
 // const uint32_t msRetryDelay = 5*60000; // retry every 5min
 // const uint32_t msRetryTime  =   30000; // stop trying after 30sec
@@ -117,7 +124,8 @@ void setup() {
     
     //   Particle.connect();
     // if (!waitFor(Particle.connected, msRetryTime)) {
-    //     WiFi.off();                // no luck, no need for WiFi
+    //     WiFtate);
+    // no luck, no need for WiFi
     // }
     
     Particle.variable("Number of Sensors", sensorNum); // publishes global vars to particle api, vars are updated after each loop
@@ -146,6 +154,7 @@ void setup() {
     Particle.function("Set Freezer Warning Temp", freezerWarningF);
     Particle.function("Set Fridge Warning Temp", fridgeWarningF);
     Particle.function("Reset Control Overrides", resetOverrides);
+    Particle.function("Set Log Time (min)", setLogTime);
 }
 
 void loop() {
@@ -163,9 +172,15 @@ void loop() {
 
     compressorControl(compressorState); // passes the desired state to the control function
     fanControl(fanState);
-  
+    //write a function that checks if the time passed is a multiple of the log time
+    if ( timePassed % ( logTime*60*1000 ) == 0 ){ // if the time is a multiple of the log time
+        Serial.println("Logging Data");
+        logData(); // logs data to google sheets
+        timePassed = 0; // resets the loop counter
+    }
     Serial.println("-------------------------------------------------------------------");
-    delay(10000); // waits 10 seconds
+    delay(sleepTime); // waits for sleep time
+    timePassed = timePassed + sleepTime; // increments the loop counter
 }
 
 bool checkError(){
@@ -372,6 +387,20 @@ void updateAll() {   //updates all 5 sensors
     //temps[4] = updateTemperature(sensor5);
 }
 
+void logData() {
+    char freezerPayload[128];
+    char fridgePayload[128];
+
+    snprintf(freezerPayload, sizeof(freezerPayload), "[%f, %f, %s]", temps[0], temps[1], compressorState ? "true" : "false");
+    snprintf(fridgePayload, sizeof(fridgePayload), "[%f, %f, %s]", temps[2], temps[3], fanState ? "true" : "false");
+
+    Particle.publish("freezerlog", freezerPayload, PRIVATE);
+    Particle.publish("fridgelog", fridgePayload, PRIVATE);
+}
+
+
+
+
 double updateTemperature(DeviceAddress deviceAddress, int device_num, String deviceStr) { // asks each sensor for temperature and converts value to (F)
     if ( sensors.isConnected(deviceAddress) ) {
         double tempF = sensors.getTempF(deviceAddress);
@@ -379,7 +408,7 @@ double updateTemperature(DeviceAddress deviceAddress, int device_num, String dev
         Serial.println(" F");
         if ( offlineStats[device_num-1] == true ){
             Serial.println("Sensor Online");
-            Particle.publish("Sensor Online", deviceStr, PUBLIC);
+            Particle.publish("Sensor Online", deviceStr, PRIVATE);
             offlineStats[device_num-1] = false;
         }        
         return tempF;
@@ -388,7 +417,7 @@ double updateTemperature(DeviceAddress deviceAddress, int device_num, String dev
         //Serial.println("NOT DETECTED");
        Serial.println("-1000");
        if (offlineStats[device_num-1] == false){ 
-           Particle.publish("Sensor Offline", deviceStr, PUBLIC);
+           Particle.publish("Sensor Offline", deviceStr, PRIVATE);
            Serial.println("Sensor Offline");
            offlineStats[device_num-1] = true;
        }
@@ -423,10 +452,16 @@ int fanOverrideToOff(String command){
 
 
 //////////////////////////////////////////////
-
+int setLogTime(String command){ // sets the log interval to the input value
+    logTime = command.toInt();
+    return logTime;
+}
 
 
 int resetOverrides(String command){ //reset overrides to default no override
+    fridgeCooling = false;
+    freezerCooling = false;
+
     fanOverrideOn = false;
     compressorOverrideOn = false;
     fanOverrideOff = false;
