@@ -9,7 +9,6 @@
 #include <OneWire.h>
 #include <spark-dallas-temperature.h>
 #include <string>
-#include <ArduinoJson.h>
 
 #define INVALID_SENSOR_INDEX 0xff
 #define INVALID_TEMP 0x7fff
